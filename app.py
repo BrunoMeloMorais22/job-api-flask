@@ -32,7 +32,14 @@ with app.app_context():
 
 @app.route("/")
 def home():
-    return {"message": "API de Vagas de Emprego"}
+    return {"message": "API de Gerenciador de Tarefas",
+        "endpoints": {
+            "register": "POST /register",
+            "login": "POST /login",
+            "criar_vaga": "POST /job",
+            "Candidatar-se": "POST /jobs/<int:job_id>/apply",
+            "Listar": "GET /jobs"
+        }}
 
 if __name__ == "__main__":
     app.run(debug=True)

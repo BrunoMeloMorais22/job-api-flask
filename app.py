@@ -32,7 +32,7 @@ with app.app_context():
 
 @app.route("/")
 def home():
-    return {"message": "API de Gerenciador de Tarefas",
+    return {"message": "API de Vagas de Empregos",
         "endpoints": {
             "register": "POST /register",
             "login": "POST /login",

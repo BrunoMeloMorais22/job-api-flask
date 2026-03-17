@@ -4,6 +4,8 @@ API REST desenvolvida em Python para gerenciamento de vagas de emprego, permitin
 
 Este projeto foi desenvolvido com foco em praticar desenvolvimento backend, autenticação e controle de permissões.
 
+API online: https://job-api-flask.onrender.com
+
 🧠 Funcionalidades
 
     ✔ Cadastro de usuários

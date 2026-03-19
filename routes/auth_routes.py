@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from models import User
 from database import db
+from schemas import UserSchema
 from email_validator import validate_email, EmailNotValidError
 from flask_jwt_extended import create_access_token
 from werkzeug.security import check_password_hash
@@ -10,26 +11,24 @@ auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
-    data = request.json
+    try:
+        data = UserSchema(**request.json)
 
-    nome = data.get("nome")
-    email = data.get("email")
-    senha = data.get("senha")
-    tipo_usuario = data.get("tipo_usuario")
+        senha_hash = generate_password_hash(data.senha)
 
-    senha_hash = generate_password_hash(senha)
+        user = User(
+            nome = data.nome,
+            email = data.email,
+            senha = senha_hash,
+            tipo_usuario = data.tipo_usuario
+        )
 
-    user = User(
-        nome = nome,
-        email = email,
-        senha = senha_hash,
-        tipo_usuario = tipo_usuario
-    )
+        db.session.add(user)
+        db.session.commit()
 
-    db.session.add(user)
-    db.session.commit()
-
-    return jsonify({"message": "Usuário cadastrado com sucesso"}), 201
+        return jsonify({"message": "Usuário cadastrado com sucesso"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
 @auth_bp.route("/login", methods=["POST"])
 def login():
@@ -38,17 +37,16 @@ def login():
     email = data.get("email")
     senha = data.get("senha")
 
-    try:
-        valid = validate_email(email)
-        email = valid.email
-    except EmailNotValidError:
-        return jsonify({"error": "Email inválido"}), 400
-
     user = User.query.filter_by(email=email).first()
 
     if not email or not senha:
         return jsonify({"message": "Por favor, preencha todos os campos"})
     
+    try:
+        valid = validate_email(email)
+        email = valid.email
+    except EmailNotValidError:
+        return jsonify({"error": "Email inválido"}), 400
 
     if not user:
         return jsonify({"error": "Nenhum usuário encontrado"}), 404

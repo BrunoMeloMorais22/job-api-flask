@@ -11,30 +11,34 @@ job_auth = Blueprint("jobs", __name__)
 @job_auth.route("/job", methods=["POST"])
 @jwt_required()
 def create_job():
-    user_id = int(get_jwt_identity())
+    try:
 
-    user = User.query.get(user_id)
+        user_id = int(get_jwt_identity())
 
-    if user.tipo_usuario != 'empresa':
-        return jsonify({"error": "Apenas empresas podem criar vagas"}), 403
+        user = User.query.get(user_id)
 
-    data = request.json
+        if user.tipo_usuario != 'empresa':
+            return jsonify({"error": "Apenas empresas podem criar vagas"}), 403
 
-    titulo = data.get("titulo")
-    descricao = data.get("descricao")
-    salario = data.get("salario")
+        data = request.json
+
+        titulo = data.get("titulo")
+        descricao = data.get("descricao")
+        salario = data.get("salario")
     
-    job = Job(
-        titulo = titulo,
-        descricao = descricao,
-        salario = salario,
-        empresa_id = user.id
-    )
+        job = Job(
+            titulo = titulo,
+            descricao = descricao,
+            salario = salario,
+            empresa_id = user.id
+        )
 
-    db.session.add(job)
-    db.session.commit()
+        db.session.add(job)
+        db.session.commit()
 
-    return jsonify({"message": "Vaga criada com sucesso"}), 201
+        return jsonify({"message": "Vaga criada com sucesso"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @job_auth.route("/jobs/<int:job_id>/apply", methods=["POST"])

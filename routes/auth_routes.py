@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from models import User
 from database import db
+from email_validator import validate_email, EmailNotValidError
 from flask_jwt_extended import create_access_token
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
@@ -36,6 +37,12 @@ def login():
 
     email = data.get("email")
     senha = data.get("senha")
+
+    try:
+        valid = validate_email(email)
+        email = valid.email
+    except EmailNotValidError:
+        return jsonify({"error": "Email inválido"}), 400
 
     user = User.query.filter_by(email=email).first()
 
